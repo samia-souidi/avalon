@@ -81,3 +81,8 @@ cucumber-results/
 
 /dropbox
 public/source_maps
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
