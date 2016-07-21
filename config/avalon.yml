@@ -1,0 +1,40 @@
+---
+production:
+  fedora:
+    namespace: avalon
+  domain:
+    host: <%= ENV['AVALON_HOST'] %> 
+    protocol: http
+  dropbox:
+    path: /var/avalon/dropbox/
+    upload_uri: sftp://anyhost/var/avalon/dropbox
+  matterhorn:
+    root: <%= ENV['MATTERHORN_URL'] %>
+    baseApplication: avalon
+    cleanup_log: log/matterhorn_cleanup.log
+  mediainfo:
+    path: /usr/bin/mediainfo
+  ffmpeg:
+    path: /usr/bin/ffmpeg
+  email:
+    comments: vovcomment@dlib.indiana.edu
+    notification: avalon-core-l@list.indiana.edu
+    support: avalon-core-l@list.indiana.edu
+    mailer:
+      smtp:
+        address: mail-relay.iu.edu 
+        port: 587
+        enable_starttls_auto: false
+  streaming:
+    server: :adobe
+    content_path: /var/avalon/rtmp_streams
+    stream_token_ttl: 20
+    rtmp_base: rtmp://<%=ENV['AVALON_HOST']%>/avalon
+    http_base: http://<%=ENV['AVALON_HOST']%>/avalon
+  groups:
+    system_groups:
+    - administrator
+    - manager
+    - group_manager
+  controlled_vocabulary:
+    path: config/controlled_vocabulary.yml
