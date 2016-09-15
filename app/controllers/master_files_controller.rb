@@ -14,6 +14,8 @@
 
 # require 'avalon/controller/controller_behavior'
 
+include SecurityHelper
+
 class MasterFilesController < ApplicationController
   # include Avalon::Controller::ControllerBehavior
 
@@ -44,10 +46,9 @@ class MasterFilesController < ApplicationController
   end
 
   def embed
-    @master_file = MasterFile.find(params[:id])
-    if can? :read, @master_file
-      @token = @master_file.nil? ? "" : StreamToken.find_or_create_session_token(session, @master_file.id)
-      @stream_info = @master_file.stream_details(@token, default_url_options[:host])
+    @masterfile = MasterFile.find(params[:id])
+    if can? :read, @masterfile.mediaobject
+      @stream_info = secure_streams(@masterfile.stream_details)
     end
     respond_to do |format|
       format.html do
