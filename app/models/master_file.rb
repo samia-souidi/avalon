@@ -500,9 +500,9 @@ class MasterFile < ActiveFedora::Base
     unless File.exists?(response[:source])
       Rails.logger.warn("Masterfile `#{file_location}` not found. Extracting via HLS.")
       begin
-        token = StreamToken.find_or_create_session_token({media_token:nil}, self.id)
-        playlist_url = self.stream_details(token)[:stream_hls].find { |d| d[:quality] == 'high' }[:url]
-        playlist = Avalon::M3U8Reader.read(playlist_url)
+        playlist_url = self.stream_details[:stream_hls].find { |d| d[:quality] == 'high' }[:url]
+        secure_url = SecurityHandler.secure_stream(playlist_url, target: self.pid)
+        playlist = Avalon::M3U8Reader.read(secure_url)
         details = playlist.at(options[:offset])
         target = File.join(Dir.tmpdir,File.basename(details[:location]))
         File.open(target,'wb') { |f| open(details[:location]) { |io| f.write(io.read) } }
