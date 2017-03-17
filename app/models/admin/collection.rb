@@ -1,11 +1,11 @@
 # Copyright 2011-2017, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -182,11 +182,11 @@ class Admin::Collection < ActiveFedora::Base
   end
 
   def dropbox
-    Avalon::Dropbox.new( dropbox_absolute_path, self )
+    DropboxService.dropbox(dropbox_directory_name)
   end
 
-  def dropbox_absolute_path( name = nil )
-    File.join(Avalon::Configuration.lookup('dropbox.path'), name || dropbox_directory_name)
+  def dropbox_absolute_path
+    DropboxService.dropbox_location(dropbox_directory_name)
   end
 
   def media_objects_to_json
@@ -246,28 +246,8 @@ class Admin::Collection < ActiveFedora::Base
 
     def create_dropbox_directory!
       name = self.dropbox_directory_name
-
-      if name.blank?
-        name = Avalon::Sanitizer.sanitize(self.name)
-        iter = 2
-        original_name = name.dup.freeze
-
-        while File.exist? dropbox_absolute_path(name)
-          name = "#{original_name}_#{iter}"
-          iter += 1
-        end
-      end
-
-      absolute_path = dropbox_absolute_path(name)
-
-      unless File.directory?(absolute_path)
-        begin
-          Dir.mkdir(absolute_path)
-        rescue Exception => e
-          Rails.logger.error "Could not create directory (#{absolute_path}): #{e.inspect}"
-        end
-      end
-      self.dropbox_directory_name = name
+      name = Avalon::Sanitizer.sanitize(self.name) if name.blank?
+      self.dropbox_directory_name = DropboxService.create_directory!(name)
     end
 
     # Override represented_visibility if you want to add another visibility that is
