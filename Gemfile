@@ -148,5 +148,9 @@ group :postgres, optional: true do
   gem 'pg'
 end
 
+group :aws do
+  gem 'aws-sdk'
+end
+
 extra_gems = File.expand_path("../Gemfile.local",__FILE__)
 eval File.read(extra_gems) if File.exists?(extra_gems)

@@ -392,7 +392,7 @@ class MasterFile < ActiveFedora::Base
   end
 
   def encoder_class
-    find_encoder_class(encoder_classname) || find_encoder_class(workflow_name.to_s.classify) || ActiveEncode::Base
+    find_encoder_class(encoder_classname) || find_encoder_class(workflow_name.to_s.classify) || MasterFile.default_encoder_class || ActiveEncode::Base
   end
 
   def encoder_class=(value)
@@ -402,6 +402,20 @@ class MasterFile < ActiveFedora::Base
       self.encoder_classname = value.name
     else
       raise ArgumentError, '#encoder_class must be a descendant of ActiveEncode::Base'
+    end
+  end
+
+  def self.default_encoder_class
+    @@default_encoder_class ||= nil
+  end
+
+  def self.default_encoder_class=(value)
+    if value.nil?
+      @@default_encoder_class = nil
+    elsif value.is_a?(Class) and value.ancestors.include?(ActiveEncode::Base)
+      @@default_encoder_class = value
+    else
+      raise ArgumentError, '#default_encoder_class must be a descendant of ActiveEncode::Base'
     end
   end
 
