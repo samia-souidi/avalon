@@ -27,7 +27,7 @@ module Avalon
       end
       
       def instance
-        config = Avalon::Configuration.lookup('bib_retriever')
+        config = Settings.bib_retriever
         unless config.respond_to?(:[]) and config['protocol'].present?
           raise ArgumentError, "Missing/invalid bib retriever configuration" 
         end

@@ -74,7 +74,7 @@ class MasterFilesController < ApplicationController
         hash = {
           "version" => "1.0",
           "type" => mf.is_video? ? "video" : "rich",
-          "provider_name" => Avalon::Configuration.lookup('name') || 'Avalon Media System',
+          "provider_name" => Settings.name || 'Avalon Media System',
           "provider_url" => request.base_url,
           "width" => width,
           "height" => height,

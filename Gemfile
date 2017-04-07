@@ -72,6 +72,8 @@ gem 'whenever', git: "https://github.com/javan/whenever.git", require: false
 gem 'with_locking'
 gem 'parallel'
 gem 'avalon-about', git: 'https://github.com/avalonmediasystem/avalon-about.git', tag: 'avalon-r6'
+gem 'about_page', git: 'https://github.com/avalonmediasystem/about_page.git', tag: 'avalon-r6'
+gem 'config'
 gem 'about_page', git: 'https://github.com/avalonmediasystem/about_page.git', tag: 'avalon-r6.1'
 gem 'jquery-datatables'
 
@@ -146,6 +148,11 @@ group :test do
   gem 'rspec-retry'
   gem 'hashdiff'
   gem 'webmock'
+end
+
+group :aws do
+  gem 'aws-sdk'
+  gem 'zk'
 end
 
 group :mysql, optional: true do
