@@ -498,7 +498,7 @@ class MasterFile < ActiveFedora::Base
       raise RangeError, "Offset #{offset} not in range 0..#{self.duration}"
     end
 
-    ffmpeg = Avalon::Configuration.lookup('ffmpeg.path')
+    ffmpeg = Settings.ffmpeg.path
     frame_size = (options[:size].nil? or options[:size] == 'auto') ? self.original_frame_size : options[:size]
 
     (new_width,new_height) = frame_size.split(/x/).collect &:to_f
@@ -578,7 +578,7 @@ class MasterFile < ActiveFedora::Base
   def saveOriginal(file, original_name=nil)
     realpath = File.realpath(file.path)
     if original_name.present?
-      config_path = Avalon::Configuration.lookup('matterhorn.media_path')
+      config_path = Settings.matterhorn.media_path
       newpath = nil
       if config_path.present? and File.directory?(config_path)
         newpath = File.join(config_path, original_name)
@@ -631,11 +631,11 @@ class MasterFile < ActiveFedora::Base
   def post_processing_file_management
     logger.debug "Finished processing"
 
-    case Avalon::Configuration.lookup('master_file_management.strategy')
+    case Settings.master_file_management.strategy
     when 'delete'
       MasterFileManagementJobs::Delete.perform_now self.id
     when 'move'
-      move_path = Avalon::Configuration.lookup('master_file_management.path')
+      move_path = Settings.master_file_management.path
       raise '"path" configuration missing for master_file_management strategy "move"' if move_path.blank?
       newpath = File.join(move_path, MasterFile.post_processing_move_filename(file_location, id: id))
       MasterFileManagementJobs::Move.perform_later self.id, newpath

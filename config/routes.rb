@@ -124,7 +124,7 @@ Rails.application.routes.draw do
       delete 'update_multiple'
     end
     collection do
-      if Avalon::Configuration.has_key?('variations')
+      if Settings['variations'].present?
         post 'import_variations_playlist'
       end
     end

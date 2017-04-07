@@ -21,7 +21,7 @@ describe Avalon::BibRetriever do
 
   describe 'configured?' do
     before :each do
-      Avalon::Configuration['bib_retriever'] = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
+      Settings.bib_retriever = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
     end
 
     it 'valid' do
@@ -29,12 +29,12 @@ describe Avalon::BibRetriever do
     end
 
     it 'invalid' do
-      Avalon::Configuration['bib_retriever'] = { 'protocol' => 'unknown', 'url' => 'http://zgate.example.edu:9000/db' }
+      Settings.bib_retriever = { 'protocol' => 'unknown', 'url' => 'http://zgate.example.edu:9000/db' }
       expect(Avalon::BibRetriever).not_to be_configured
     end
 
     it 'missing' do
-      Avalon::Configuration['bib_retriever'] = nil
+      Settings.bib_retriever = nil
       expect(Avalon::BibRetriever).not_to be_configured
     end
   end
@@ -46,7 +46,7 @@ describe Avalon::BibRetriever do
       let(:sru_response) { File.read(File.expand_path("../../../fixtures/#{bib_id}.xml",__FILE__)) }
 
       before :each do
-        Avalon::Configuration['bib_retriever'] = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
+        Settings.bib_retriever = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
         FakeWeb.register_uri :get, sru_url, body: sru_response
       end
 
@@ -64,7 +64,7 @@ describe Avalon::BibRetriever do
       let(:sru_response) { File.read(File.expand_path("../../../fixtures/#{bib_id}-ns.xml",__FILE__)) }
 
       before :each do
-        Avalon::Configuration['bib_retriever'] = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db', 'namespace' => 'http://example.edu/fake/sru/namespace/' }
+        Settings.bib_retriever = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db', 'namespace' => 'http://example.edu/fake/sru/namespace/' }
         FakeWeb.register_uri :get, sru_url, body: sru_response
       end
 

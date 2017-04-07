@@ -71,6 +71,7 @@ gem 'with_locking'
 gem 'parallel'
 gem 'avalon-about', git: 'https://github.com/avalonmediasystem/avalon-about.git', tag: 'avalon-r6'
 gem 'about_page', git: 'https://github.com/avalonmediasystem/about_page.git', tag: 'avalon-r6'
+gem 'config'
 
 #MediaElement.js related
 gem 'mediaelement_rails', git: 'https://github.com/avalonmediasystem/mediaelement_rails.git', tag: 'avalon-r6'
@@ -139,6 +140,11 @@ group :test do
   gem 'email_spec'
   gem 'capybara'
   gem 'hashdiff'
+end
+
+group :aws do
+  gem 'aws-sdk'
+  gem 'zk'
 end
 
 group :mysql, optional: true do

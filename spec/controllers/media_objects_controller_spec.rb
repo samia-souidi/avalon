@@ -219,7 +219,7 @@ describe MediaObjectsController, type: :controller do
           expect(new_media_object.workflow.last_completed_step).to eq([HYDRANT_STEPS.last.step])
        end
         it "should create a new media_object with successful bib import" do
-          Avalon::Configuration['bib_retriever'] = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
+          Settings.bib_retriever = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
           FakeWeb.register_uri :get, sru_url, body: sru_response
           fields = { bibliographic_id: bib_id }
           post 'create', format: 'json', import_bib_record: true, fields: fields, files: [master_file], collection_id: collection.id
@@ -229,7 +229,7 @@ describe MediaObjectsController, type: :controller do
           expect(new_media_object.title).to eq('245 A : B F G K N P S')
         end
         it "should create a new media_object with supplied fields when bib import fails" do
-          Avalon::Configuration['bib_retriever'] = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
+          Settings.bib_retriever = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
           FakeWeb.register_uri :get, sru_url, body: nil
           ex_media_object = FactoryGirl.create(:media_object)
           fields = {}
@@ -265,7 +265,7 @@ describe MediaObjectsController, type: :controller do
           expect(new_media_object.copyright_date).to eq nil
         end
         it "should merge supplied other identifiers after bib import" do
-          Avalon::Configuration['bib_retriever'] = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
+          Settings.bib_retriever = { 'protocol' => 'sru', 'url' => 'http://zgate.example.edu:9000/db' }
           FakeWeb.register_uri :get, sru_url, body: sru_response
           fields = { bibliographic_id: bib_id, other_identifier_type: ['other'], other_identifier: ['12345'] }
           post 'create', format: 'json', import_bib_record: true, fields: fields, files: [master_file], collection_id: collection.id
