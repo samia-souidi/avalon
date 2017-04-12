@@ -2,12 +2,13 @@
 namespace :zookeeper do
   desc 'Push solr configs into zookeeper'
   task upload: [:environment] do
-    SolrConfigUploader.default.upload(Settings.solr.configset)
+    SolrConfigUploader.default.upload(Settings.solr.configset_source_path)
   end
 
   desc 'Create a collection'
   task create: [:environment] do
-    #TODO implement SolrCloud create collection
+    collection_name = Blacklight.default_index.connection.uri.path.split(/\//).reject(&:empty?).last
+    SolrCollectionCreator.new(collection_name).perform
   end
 
   desc 'Delete solr configs from zookeeper'
