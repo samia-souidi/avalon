@@ -64,8 +64,8 @@ gem 'acts_as_list'
 gem 'api-pagination'
 gem 'browse-everything', '~> 0.10.5'
 gem 'bootstrap_form'
-gem 'bootstrap-toggle-rails'
-gem 'rubyhorn', git: "https://github.com/avalonmediasystem/rubyhorn.git", tag: 'avalon-r6'
+gem 'bootstrap-toggle-rails', git: "https://github.com/rkallensee/bootstrap-toggle-rails.git"
+gem 'rubyhorn', git: "https://github.com/avalonmediasystem/rubyhorn.git"
 gem 'roo'
 gem 'activerecord-session_store'
 gem 'whenever', git: "https://github.com/javan/whenever.git", require: false

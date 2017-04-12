@@ -119,6 +119,21 @@ GIT
     whenever (0.9.7)
       chronic (>= 0.6.3)
 
+GIT
+  remote: https://github.com/projecthydra-labs/speedy_af.git
+  revision: 661b34c57f4e8de9db2c07aa80acce7c6288462d
+  tag: v0.1.0
+  specs:
+    speedy-af (0.1.0)
+      active-fedora (>= 11.0.0)
+      activesupport
+
+GIT
+  remote: https://github.com/rkallensee/bootstrap-toggle-rails.git
+  revision: 1eaf2b57b4e2fab387f913ef6833ab735eacb0d4
+  specs:
+    bootstrap-toggle-rails (2.2.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -234,7 +249,6 @@ GEM
     bootstrap-sass (3.3.7)
       autoprefixer-rails (>= 5.2.1)
       sass (>= 3.3.4)
-    bootstrap-toggle-rails (2.2.1.0)
     bootstrap_form (2.5.2)
     browse-everything (0.10.5)
       bootstrap-sass
@@ -785,7 +799,7 @@ DEPENDENCIES
   avalon-workflow!
   aws-sdk
   blacklight (~> 6.6)
-  bootstrap-toggle-rails
+  bootstrap-toggle-rails!
   bootstrap_form
   browse-everything (~> 0.10.5)
   byebug
