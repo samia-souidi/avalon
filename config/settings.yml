@@ -1,6 +1,4 @@
 name: 'Avalon' # used in page titles
-fedora:
-  namespace: avalon
 domain:
   host: localhost
   port: 80
@@ -15,19 +13,34 @@ matterhorn:
 mediainfo:
   path: '/usr/bin/mediainfo'
 ffmpeg:
-  path: 'usr/local/ffmpeg'
+  path: '/usr/local/bin/ffmpeg'
 email:
   comments: 'avalon-comments@example.edu'
   notification: 'avalon-notifications@example.edu'
   support: 'avalon-support@example.edu'
-  mailer:
-    smtp:
-      address: 'smtp.example.edu'
-      port: 587
-      enable_starttls_auto: false
+#  mailer:
+#    smtp:
+#      address: 'smtp.example.edu'
+#      port: 587
+#      enable_starttls_auto: false
 solr:
-  collection: avalon
-  configset: <%= File.join(Rails.root, 'solr', 'config') %>
+  configset: avalon
+  configset_source_path: <%= File.join(Rails.root, 'solr', 'config') %>
+  collection_options:
+    async:
+    auto_add_replicas:
+    collection:
+      config_name: avalon
+    create_node_set:
+    max_shards_per_node:
+    num_shards: 1
+    replication_factor:
+    router:
+      name:
+      field:
+    rule:
+    shards:
+    snitch:
 zookeeper:
   connection_str: "localhost:9983/configs"
 streaming:
@@ -41,9 +54,9 @@ groups:
 master_file_management:
   strategy: 'none' #'delete', or 'move' (for move uncomment and configure next line)
   #path: '/path/to/move/to'
-bib_retriever:
-  protocol: sru
-  url: http://zgate.example.edu:9000/exampledb
-  query: rec.id='%s'
+#bib_retriever:
+#  protocol: sru
+#  url: http://zgate.example.edu:9000/exampledb
+#  query: rec.id='%s'
 controlled_vocabulary:
   path: config/controlled_vocabulary.yml
