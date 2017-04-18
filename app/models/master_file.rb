@@ -1,11 +1,11 @@
 # Copyright 2011-2017, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -168,7 +168,15 @@ class MasterFile < ActiveFedora::Base
       file.each_value {|f| f.close unless f.closed? }
     when ActionDispatch::Http::UploadedFile #Web upload
       saveOriginal(file, file.original_filename)
-    else #Batch or dropbox
+    when URI
+      case file.scheme
+      when 'file'
+        saveOriginal(file.path)
+      when 's3'
+        self.file_location = file.to_s
+        self.file_size = FileResolver::S3File.new(uri).object.size
+      end
+    else #Batch
       saveOriginal(file)
     end
     reloadTechnicalMetadata!
@@ -243,9 +251,9 @@ class MasterFile < ActiveFedora::Base
 
     input = if file.is_a? Hash
       file_dup = file.dup
-      file_dup.each_pair {|quality, f| file_dup[quality] = "file://" + URI.escape(File.realpath(f.to_path))}
+      file_dup.each_pair {|quality, f| file_dup[quality] = FileResolver.new(f.to_path).uri }
     else
-      "file://" + URI.escape(file_location)
+      FileResolver.new(file_location).uri
     end
 
     ActiveEncodeJob::Create.perform_later(self.id, input, {preset: self.workflow_name})
@@ -478,7 +486,7 @@ class MasterFile < ActiveFedora::Base
   protected
 
   def mediainfo
-    @mediainfo ||= Mediainfo.new file_location
+    @mediainfo ||= Mediainfo.new(FileResolver.new(file_location).access_uri)
   end
 
   def find_frame_source(options={})
