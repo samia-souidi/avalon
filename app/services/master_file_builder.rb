@@ -45,6 +45,7 @@ module MasterFileBuilder
         response[:flash][:error] << "There was a problem storing the file"
       end
     end
+    response[:flash][:error] = nil if response[:flash][:error].empty?
     response
   end
 
@@ -73,8 +74,9 @@ module MasterFileBuilder
   module DropboxUpload
     def self.build(params)
       params[:selected_files].values.collect do |entry|
-        uri = URI.parse(entry[:url])
-        Spec.new(uri, File.basename(uri.path), Rack::Mime.mime_type(File.extname(uri.path)), params[:workflow])
+        uri = URI(entry[:url])
+        path = URI.decode(uri.path)
+        Spec.new(uri, File.basename(path), Rack::Mime.mime_type(File.extname(path)), params[:workflow])
       end
     end
   end

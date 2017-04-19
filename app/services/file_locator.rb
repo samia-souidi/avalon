@@ -1,12 +1,13 @@
 require 'aws-sdk'
 
-class FileResolver
+class FileLocator
   attr_reader :source
 
   class S3File
     attr_reader :bucket, :key
 
     def initialize(uri)
+      uri = URI(uri)
       @bucket = URI.decode(uri.host)
       @key = URI.decode(uri.path).sub(%r(^/*(.+)/*$),'\1')
     end
@@ -22,29 +23,37 @@ class FileResolver
 
   def uri
     if @uri.nil?
-      @uri = URI.parse(source)
+      encoded_source = source
+      begin
+        @uri = URI(encoded_source)
+      rescue URI::InvalidURIError
+        if encoded_source == source
+          encoded_source = URI.encode(encoded_source)
+          retry
+        else
+          raise
+        end
+      end
+
       if @uri.scheme.nil?
-        @uri = URI.parse("file://#{File.expand_path(source)}")
+        @uri = URI("file://#{URI.encode(File.expand_path(source))}")
       end
     end
     @uri
   end
 
-  def access_uri
+  def location
     case uri.scheme
     when 's3'
       S3File.new(uri).object.presigned_url(:get)
+    when 'file'
+      URI.decode(uri.path)
     else
       @uri.to_s
     end
   end
 
   def open(&block)
-    case uri.scheme
-    when 'file'
-      Kernel::open(uri.path, 'r', &block)
-    else
-      Kernel::open(access_uri, &block)
-    end
+    Kernel::open(location, 'r', &block)
   end
 end

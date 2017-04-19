@@ -3,6 +3,7 @@ gem 'fedora-migrate', '~> 0.5.0'
 gem 'rdf-rdfxml'
 
 gem 'hydra-head', '~> 10.3.4'
+gem 'active-fedora', '>= 10.3.0'
 gem 'active-fedora', '~> 11.2'
 gem 'active_fedora-datastreams'
 gem 'active_fedora-noid', '~> 2.0.2'
@@ -50,7 +51,7 @@ gem 'devise'
 
 # Avalon-specific
 gem 'avalon-workflow', git: "https://github.com/avalonmediasystem/avalon-workflow.git", branch: 'no_invalid_objs'
-gem 'active_encode', '~> 0.1.1'
+gem 'active_encode', git: "http://github.com/projecthydra-labs/active-encode.git"
 gem 'hooks'
 gem 'iconv'
 gem 'mediainfo', git: "https://github.com/avalonmediasystem/mediainfo.git", branch: 'remote_files'

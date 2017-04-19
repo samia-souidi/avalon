@@ -1,4 +1,11 @@
 GIT
+  remote: http://github.com/projecthydra-labs/active-encode.git
+  revision: 715159a9b66a5b2418701cc6b962df66d677034f
+  specs:
+    active_encode (0.1.0)
+      activesupport
+
+GIT
   remote: https://github.com/avalonmediasystem/about_page.git
   revision: d59bd65d5482f0b69c2ebf1acd60952ecd6b6fb3
   tag: avalon-r6.1
@@ -84,7 +91,7 @@ GIT
 
 GIT
   remote: https://github.com/avalonmediasystem/mediainfo.git
-  revision: 44d6a2a60300a0b46811d981e42c732b43ac931c
+  revision: cd5b2675958f3215f93190ab696727dd2327e842
   branch: remote_files
   specs:
     mediainfo (0.7.1)
@@ -173,8 +180,6 @@ GEM
     active_annotations (0.2.2)
       json-ld
       rdf-vocab (~> 2.1.0)
-    active_encode (0.1.1)
-      activesupport
     active_fedora-datastreams (0.1.0)
       active-fedora (>= 11.0.0.pre, < 12)
       nom-xml (>= 0.5.1)
@@ -789,7 +794,7 @@ DEPENDENCIES
   about_page!
   active-fedora (~> 11.2)
   active_annotations (~> 0.2.2)
-  active_encode (~> 0.1.1)
+  active_encode!
   active_fedora-datastreams
   active_fedora-noid (~> 2.0.2)
   activerecord-session_store
