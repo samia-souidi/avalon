@@ -6,6 +6,8 @@ domain:
 dropbox:
   path: '/srv/avalon/dropbox/'
   upload_uri: 'sftp://localhost/srv/avalon/dropbox'
+encoding:
+  engine_adapter: matterhorn
 matterhorn:
   root: 'http://localhost:8080/'
   baseApplication: 'avalon'

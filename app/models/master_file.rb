@@ -164,7 +164,7 @@ class MasterFile < ActiveFedora::Base
         saveOriginal(file.path)
       when 's3'
         self.file_location = file.to_s
-        self.file_size = FileResolver::S3File.new(uri).object.size
+        self.file_size = FileLocator::S3File.new(file).object.size
       end
     else #Batch
       saveOriginal(file)
@@ -241,9 +241,9 @@ class MasterFile < ActiveFedora::Base
 
     input = if file.is_a? Hash
       file_dup = file.dup
-      file_dup.each_pair {|quality, f| file_dup[quality] = FileResolver.new(f.to_path).uri }
+      file_dup.each_pair {|quality, f| file_dup[quality] = FileLocator.new(f.to_path).uri }
     else
-      FileResolver.new(file_location).uri
+      FileLocator.new(file_location).uri.to_s
     end
 
     ActiveEncodeJob::Create.perform_later(self.id, input, {preset: self.workflow_name})
@@ -400,7 +400,7 @@ class MasterFile < ActiveFedora::Base
   end
 
   def encoder_class
-    find_encoder_class(encoder_classname) || find_encoder_class(workflow_name.to_s.classify) || ActiveEncode::Base
+    find_encoder_class(encoder_classname) || find_encoder_class(workflow_name.to_s.classify) || MasterFile.default_encoder_class || ActiveEncode::Base
   end
 
   def encoder_class=(value)
@@ -410,6 +410,20 @@ class MasterFile < ActiveFedora::Base
       self.encoder_classname = value.name
     else
       raise ArgumentError, '#encoder_class must be a descendant of ActiveEncode::Base'
+    end
+  end
+
+  def self.default_encoder_class
+    @@default_encoder_class ||= nil
+  end
+
+  def self.default_encoder_class=(value)
+    if value.nil?
+      @@default_encoder_class = nil
+    elsif value.is_a?(Class) and value.ancestors.include?(ActiveEncode::Base)
+      @@default_encoder_class = value
+    else
+      raise ArgumentError, '#default_encoder_class must be a descendant of ActiveEncode::Base'
     end
   end
 
@@ -473,7 +487,10 @@ class MasterFile < ActiveFedora::Base
   protected
 
   def mediainfo
-    @mediainfo ||= Mediainfo.new(FileResolver.new(file_location).access_uri)
+    if @mediainfo.nil?
+      @mediainfo = Mediainfo.new(FileLocator.new(file_location).location)
+    end
+    @mediainfo
   end
 
   def find_frame_source(options={})
