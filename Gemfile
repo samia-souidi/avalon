@@ -153,6 +153,7 @@ end
 
 group :aws do
   gem 'aws-sdk'
+  gem 'cloudfront-signer'
   gem 'zk'
 end
 
