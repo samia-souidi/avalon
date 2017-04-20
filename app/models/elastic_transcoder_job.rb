@@ -57,7 +57,7 @@ class ElasticTranscoderJob < ActiveEncode::Base
     self.id = job.id
     self.state = JOB_STATES[job.status]
     self.current_operations = []
-    self.percent_complete = JOB_COMPLETION[job.status] || 0
+    self.percent_complete = (job.outputs.select { |o| o.status == 'Complete' }.length.to_f / job.outputs.length.to_f) * 100
     self.created_at = convert_time(job.timing["submit_time_millis"])
     self.updated_at = convert_time(job.timing["start_time_millis"])
     self.finished_at = convert_time(job.timing["finish_time_millis"])
