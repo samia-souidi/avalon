@@ -1,7 +1,15 @@
 require 'cloudfront-signer'
 
 Aws::CF::Signer.configure do |config|
-  config.key = Settings.streaming.signing_key
+  key = case Settings.streaming.signing_key
+  when %r(^-----BEGIN)
+    Settings.streaming.signing_key
+  when %r(^s3://)
+    FileLocator::S3File.new(Settings.streaming.signing_key).object.get.body.read
+  else
+    File.read(Settings.streaming.signing_key)
+  end
+  config.key = key
   config.key_pair_id = Settings.streaming.signing_key_id
 end
 
