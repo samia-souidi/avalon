@@ -17,18 +17,18 @@ SecurityHandler.rewrite_url do |url, context|
   case Settings.streaming.server.to_sym
   when :aws
     context[:protocol] ||= :stream_hls
-    uri = URI(url)
+    uri = Addressable::URI.parse(url)
     expiration = Settings.streaming.stream_token_ttl.minutes.from_now
     case context[:protocol]
     when :stream_flash
       # WARNING: UGLY FILENAME MUNGING AHEAD
       content_path = File.join(File.dirname(uri.path),File.basename(uri.path,File.extname(uri.path))).sub(%r(^/),'')
       content_prefix = File.extname(uri.path).sub(%r(^\.),'')
-      result = URI(Settings.streaming.rtmp_base).merge("cfx/st/#{content_prefix}:#{content_path}")
+      result = Addressable::URI.join(Settings.streaming.rtmp_base,"cfx/st/#{content_prefix}:#{content_path}")
       result.query = Aws::CF::Signer.signed_params(content_path, expires: expiration).to_param
       result.to_s
     when :stream_hls
-      URI.join(Settings.streaming.http_base,uri.path).to_s
+      Addressable::URI.join(Settings.streaming.http_base,uri.path).to_s
       #Aws::CF::Signer.sign_url(URI.join(Settings.streaming.http_base,uri.path).to_s, expires: expiration)
     else
       url
@@ -44,7 +44,7 @@ SecurityHandler.create_cookies do |context|
   result = {}
   case Settings.streaming.server.to_sym
   when :aws
-    domain = URI(Settings.streaming.http_base).host
+    domain = Addressable::URI.parse(Settings.streaming.http_base).host
     cookie_domain = (context[:request_host].split(/\./) & domain.split(/\./)).join('.')
     resource = "http*://#{domain}/#{context[:target]}/*"
     Rails.logger.info "Creating signed policy for resource #{resource}"

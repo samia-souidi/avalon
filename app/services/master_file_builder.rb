@@ -74,7 +74,7 @@ module MasterFileBuilder
   module DropboxUpload
     def self.build(params)
       params[:selected_files].values.collect do |entry|
-        uri = URI(entry[:url])
+        uri = Addressable::URI.parse(entry[:url])
         path = URI.decode(uri.path)
         Spec.new(uri, File.basename(path), Rack::Mime.mime_type(File.extname(path)), params[:workflow])
       end

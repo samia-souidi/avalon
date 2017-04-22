@@ -168,7 +168,7 @@ class MasterFile < ActiveFedora::Base
       file.each_value {|f| f.close unless f.closed? }
     when ActionDispatch::Http::UploadedFile #Web upload
       saveOriginal(file, file.original_filename)
-    when URI
+    when URI, Addressable::URI
       case file.scheme
       when 'file'
         saveOriginal(file.path)
