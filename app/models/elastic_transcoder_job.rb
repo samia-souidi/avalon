@@ -19,7 +19,7 @@ class ElasticTranscoderJob < ActiveEncode::Base
   end
 
   def set_up_options
-    file_name = File.basename(URI(input).path,'.*')
+    file_name = File.basename(Addressable::URI.parse(input).path,'.*').gsub(URI::UNSAFE,'_')
     outputs = {
       fullaudio: {
         hls_medium: { key: "quality-medium/hls/#{file_name}", preset_id: find_or_create_preset('ts',:audio,:medium).id, segment_duration: '2' },
@@ -45,7 +45,7 @@ class ElasticTranscoderJob < ActiveEncode::Base
   end
 
   def copy_to_input_bucket
-    case URI.parse(input).scheme
+    case Addressable::URI.parse(input).scheme
     when nil,'file'
       upload_to_s3
     when 's3'

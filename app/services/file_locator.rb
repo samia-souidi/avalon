@@ -1,3 +1,4 @@
+require 'addressable/uri'
 require 'aws-sdk'
 
 class FileLocator
@@ -7,7 +8,7 @@ class FileLocator
     attr_reader :bucket, :key
 
     def initialize(uri)
-      uri = URI(uri)
+      uri = Addressable::URI.parse(uri)
       @bucket = URI.decode(uri.host)
       @key = URI.decode(uri.path).sub(%r(^/*(.+)/*$),'\1')
     end
@@ -25,7 +26,7 @@ class FileLocator
     if @uri.nil?
       encoded_source = source
       begin
-        @uri = URI(encoded_source)
+        @uri = Addressable::URI.parse(encoded_source)
       rescue URI::InvalidURIError
         if encoded_source == source
           encoded_source = URI.encode(encoded_source)
@@ -36,7 +37,7 @@ class FileLocator
       end
 
       if @uri.scheme.nil?
-        @uri = URI("file://#{URI.encode(File.expand_path(source))}")
+        @uri = Addressable::URI.parse("file://#{URI.encode(File.expand_path(source))}")
       end
     end
     @uri
