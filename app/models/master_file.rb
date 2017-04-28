@@ -496,7 +496,9 @@ class MasterFile < ActiveFedora::Base
   def find_frame_source(options={})
     options[:offset] ||= 2000
 
-    response = { source: file_location, offset: options[:offset], master: true }
+    response = { source: FileLocator.new(file_location).location, offset: options[:offset], master: true }
+    return response if response[:source] =~ %r(^https?://)
+
     unless File.exists?(response[:source])
       Rails.logger.warn("Masterfile `#{file_location}` not found. Extracting via HLS.")
       begin
@@ -507,8 +509,6 @@ class MasterFile < ActiveFedora::Base
         target = File.join(Dir.tmpdir,File.basename(details[:location]))
         File.open(target,'wb') { |f| open(details[:location]) { |io| f.write(io.read) } }
         response = { source: target, offset: details[:offset], master: false }
-      ensure
-        StreamToken.find_by_token(token).destroy
       end
     end
     return response
@@ -526,7 +526,7 @@ class MasterFile < ActiveFedora::Base
     ffmpeg = Settings.ffmpeg.path
     frame_size = (options[:size].nil? or options[:size] == 'auto') ? self.original_frame_size : options[:size]
 
-    (new_width,new_height) = frame_size.split(/x/).collect &:to_f
+    (new_width,new_height) = frame_size.split(/x/).collect(&:to_f)
     new_height = (new_width/self.display_aspect_ratio.to_f).floor
     new_height += 1 if new_height.odd?
     aspect = new_width/new_height
@@ -534,8 +534,11 @@ class MasterFile < ActiveFedora::Base
     frame_source = find_frame_source(offset: offset)
     data = nil
     Tempfile.open([base,'.jpg']) do |jpeg|
-      file_source = File.join(File.dirname(jpeg.path),"#{File.basename(jpeg.path,File.extname(jpeg.path))}#{File.extname(frame_source[:source])}")
-      File.symlink(frame_source[:source],file_source)
+      file_source = frame_source[:source]
+      unless file_source =~ %r(https?://)
+        file_source = File.join(File.dirname(jpeg.path),"#{File.basename(jpeg.path,File.extname(jpeg.path))}#{File.extname(frame_source[:source])}")
+        File.symlink(frame_source[:source],file_source)
+      end
       begin
         options = [
           '-i',       file_source,
@@ -564,7 +567,7 @@ class MasterFile < ActiveFedora::Base
         end
         data
       ensure
-        File.unlink(file_source)
+        File.unlink(file_source) unless file_source =~ %r(https?://)
       end
     end
     raise RuntimeError, "Frame extraction failed. See log for details." if data.empty?
