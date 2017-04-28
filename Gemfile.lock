@@ -180,6 +180,9 @@ GEM
     active_annotations (0.2.2)
       json-ld
       rdf-vocab (~> 2.1.0)
+    active_elastic_job (1.7.0)
+      aws-sdk (~> 2)
+      rails (>= 4.2)
     active_fedora-datastreams (0.1.0)
       active-fedora (>= 11.0.0.pre, < 12)
       nom-xml (>= 0.5.1)
@@ -794,6 +797,7 @@ DEPENDENCIES
   about_page!
   active-fedora (~> 11.2)
   active_annotations (~> 0.2.2)
+  active_elastic_job (~> 1.7)
   active_encode!
   active_fedora-datastreams
   active_fedora-noid (~> 2.0.2)

@@ -151,10 +151,11 @@ group :test do
   gem 'webmock'
 end
 
-group :aws do
+group :aws, optional: true do
   gem 'aws-sdk'
   gem 'cloudfront-signer'
   gem 'zk'
+  gem 'active_elastic_job', '~> 1.7'
 end
 
 group :mysql, optional: true do
