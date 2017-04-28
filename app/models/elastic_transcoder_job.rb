@@ -68,6 +68,30 @@ class ElasticTranscoderJob < ActiveEncode::Base
     self
   end
 
+  def remove_output!(id)
+    track = output.find { |o| o[:id] == id }
+    raise "Unknown track: `#{id}'" if track.nil?
+    s3_object = FileLocator::S3File.new(track[:url]).object
+    if s3_object.key =~ /\.m3u8$/
+      delete_segments(s3_object)
+    else
+      s3_object.delete
+    end
+  end
+
+  def delete_segments(obj)
+    raise "Invalid segmented video object" unless obj.key =~ %r(quality-.+/.+\.m3u8$)
+    bucket = obj.bucket
+    prefix = obj.key.sub(/\.m3u8$/,'')
+    next_token = nil
+    loop do
+      response = s3client.list_objects_v2(bucket: obj.bucket_name, prefix: prefix, continuation_token: next_token)
+      response.contents.collect(&:key).each { |key| bucket.object(key).delete }
+      next_token = response.continuation_token
+      break if next_token.nil?
+    end
+  end
+
   private
 
     def etclient
@@ -160,7 +184,7 @@ class ElasticTranscoderJob < ActiveEncode::Base
           managed: false,
           id: output.id,
           label: output.key.split("/", 2).first,
-          url: "s3://#{pipeline.input_bucket}/#{job.output_key_prefix}#{output.key}#{extension}"
+          url: "s3://#{pipeline.output_bucket}/#{job.output_key_prefix}#{output.key}#{extension}"
         })
       end
     end
