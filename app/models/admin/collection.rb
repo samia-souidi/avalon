@@ -245,17 +245,43 @@ class Admin::Collection < ActiveFedora::Base
     end
 
     def create_dropbox_directory!
+      if Settings.dropbox.path =~ %r(^s3://)
+        create_s3_dropbox_directory!
+      else
+        create_fs_dropbox_directory!
+      end
+    end
+
+    def calculate_dropbox_directory_name
       name = self.dropbox_directory_name
 
       if name.blank?
         name = Avalon::Sanitizer.sanitize(self.name)
         iter = 2
         original_name = name.dup.freeze
-
-        while File.exist? dropbox_absolute_path(name)
+        while yield(name)
           name = "#{original_name}_#{iter}"
           iter += 1
         end
+      end
+      name
+    end
+
+    def create_s3_dropbox_directory!
+      base_uri = Addressable::URI.parse(Settings.dropbox.path)
+      name = calculate_dropbox_directory_name do |n|
+        obj = FileLocator::S3File.new(base_uri.join(n).to_s + '/').object
+        obj.exists?
+      end
+      absolute_path = base_uri.join(name).to_s + '/'
+      obj = FileLocator::S3File.new(absolute_path).object
+      Aws::S3::Client.new.put_object(bucket: obj.bucket_name, key: obj.key)
+      self.dropbox_directory_name = name
+    end
+
+    def create_fs_dropbox_directory!
+      name = calculate_dropbox_directory_name do |n|
+        File.exist? dropbox_absolute_path(n)
       end
 
       absolute_path = dropbox_absolute_path(name)

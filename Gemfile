@@ -63,7 +63,7 @@ gem 'rest-client'
 gem 'active_annotations', '~> 0.2.2'
 gem 'acts_as_list'
 gem 'api-pagination'
-gem 'browse-everything', '~> 0.10.5'
+gem 'browse-everything', '~> 0.13.0'
 gem 'bootstrap_form'
 gem 'bootstrap-toggle-rails', git: "https://github.com/rkallensee/bootstrap-toggle-rails.git"
 gem 'rubyhorn', git: "https://github.com/avalonmediasystem/rubyhorn.git"
@@ -100,7 +100,6 @@ end
 group :development, :test do
   gem 'equivalent-xml'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'rb-readline'
   gem 'byebug'
   gem 'pry-rails'
   gem 'pry-byebug'
@@ -153,6 +152,7 @@ end
 
 group :aws, optional: true do
   gem 'aws-sdk'
+  gem 'aws-sdk-rails'
   gem 'cloudfront-signer'
   gem 'zk'
   gem 'active_elastic_job', '~> 1.7'

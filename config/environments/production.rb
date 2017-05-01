@@ -89,4 +89,7 @@ Rails.application.configure do
 
   # Suppress deprecation warnings
   Deprecation.default_deprecation_behavior = :silence
+
+  require 'active_job/queue_adapters/better_active_elastic_job_adapter'
+  config.active_job.queue_adapter     = Settings&.active_job&.queue_adapter || :resque
 end
