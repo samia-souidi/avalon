@@ -1,21 +1,27 @@
-require 'cloudfront-signer'
-
-Aws::CF::Signer.configure do |config|
-  key = case Settings.streaming.signing_key
-  when %r(^-----BEGIN)
-    Settings.streaming.signing_key
-  when %r(^s3://)
-    FileLocator::S3File.new(Settings.streaming.signing_key).object.get.body.read
-  else
-    File.read(Settings.streaming.signing_key)
+def configure_signer
+  require 'cloudfront-signer'
+  unless Aws::CF::Signer.is_configured?
+    Aws::CF::Signer.configure do |config|
+      key = case Settings.streaming.signing_key
+      when %r(^-----BEGIN)
+        Settings.streaming.signing_key
+      when %r(^s3://)
+        FileLocator::S3File.new(Settings.streaming.signing_key).object.get.body.read
+      when nil
+        Logger.warn('No CloudFront signing key configured')
+      else
+        File.read(Settings.streaming.signing_key)
+      end
+      config.key = key
+      config.key_pair_id = Settings.streaming.signing_key_id
+    end
   end
-  config.key = key
-  config.key_pair_id = Settings.streaming.signing_key_id
 end
 
 SecurityHandler.rewrite_url do |url, context|
   case Settings.streaming.server.to_sym
   when :aws
+    configure_signer
     context[:protocol] ||= :stream_hls
     uri = Addressable::URI.parse(url)
     expiration = Settings.streaming.stream_token_ttl.minutes.from_now
@@ -44,6 +50,7 @@ SecurityHandler.create_cookies do |context|
   result = {}
   case Settings.streaming.server.to_sym
   when :aws
+    configure_signer
     domain = Addressable::URI.parse(Settings.streaming.http_base).host
     cookie_domain = (context[:request_host].split(/\./) & domain.split(/\./)).join('.')
     resource = "http*://#{domain}/#{context[:target]}/*"
