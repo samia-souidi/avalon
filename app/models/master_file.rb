@@ -251,7 +251,7 @@ class MasterFile < ActiveFedora::Base
 
     input = if file.is_a? Hash
       file_dup = file.dup
-      file_dup.each_pair {|quality, f| file_dup[quality] = FileLocator.new(f.to_path).uri }
+      file_dup.each_pair {|quality, f| file_dup[quality] = FileLocator.new(f.to_path).uri.to_s }
     else
       FileLocator.new(file_location).uri.to_s
     end
