@@ -20,7 +20,7 @@ require 'fileutils'
 describe Avalon::Batch::Ingest do
   before :each do
     @saved_dropbox_path = Settings.dropbox.path
-    Settings.dropbox.path = 'spec/fixtures/dropbox'
+    Settings.dropbox.path = File.join(Rails.root, 'spec/fixtures/dropbox')
     Settings.email.notification = 'frances.dickens@reichel.com'
     # Dirty hack is to remove the .processed files both before and after the
     # test. Need to look closer into the ideal timing for where this should take
