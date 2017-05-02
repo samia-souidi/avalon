@@ -1,11 +1,11 @@
 # Copyright 2011-2017, The Trustees of Indiana University and Northwestern
 #   University.  Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
-# 
+#
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 #   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 #   CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -28,35 +28,22 @@ module Avalon
       attr_reader :spreadsheet, :file, :name, :email, :entries, :package
 
       class << self
-        def locate(root)
-          possibles = Dir[File.join(root, "**/*.{#{EXTENSIONS.join(',')}}")]
-          possibles.reject do |file|
-            File.basename(file) =~ /^~\$/ or self.error?(file) or self.processing?(file) or self.processed?(file)
-          end
+        def concrete_class=(value)
+          raise ArgumentError, "#{value} is not a Manifest" unless value.is_a?(self)
+          @concrete_class = value
         end
 
-        def error?(file)
-          if File.file?("#{file}.error")
-            if File.mtime(file) > File.mtime("#{file}.error")
-              File.unlink("#{file}.error")
-              return false
-            else
-              return true
-            end
-          end
-          return false
+        def concrete_class
+          @concrete_class ||= FileManifest
         end
 
-        def processing?(file)
-          File.file?("#{file}.processing")
-        end
-
-        def processed?(file)
-          File.file?("#{file}.processed")
+        def load(*args)
+          concrete_class.new(*args)
         end
       end
 
       def initialize(file, package)
+        raise "#{self.class.name} is an abstract class. Please set #concrete_class and use #load()" unless self.class.respond_to?(:open_spreadsheet)
         @file = file
         @package = package
         load!
@@ -65,48 +52,19 @@ module Avalon
       def load!
         @entries = []
         begin
-          @spreadsheet = Roo::Spreadsheet.open(file)
+          @spreadsheet = self.class.open_spreadsheet(file)
           @name = @spreadsheet.row(@spreadsheet.first_row)[0]
           @email = @spreadsheet.row(@spreadsheet.first_row)[1]
 
           header_row = @spreadsheet.row(@spreadsheet.first_row + 1)
 
-          @field_names = header_row.collect { |field| 
-            field.to_s.downcase.gsub(/\s/,'_').strip.to_sym 
+          @field_names = header_row.collect { |field|
+            field.to_s.downcase.gsub(/\s/,'_').strip.to_sym
           }
           create_entries!
         rescue Exception => err
           error! "Invalid manifest file: #{err.message}"
         end
-      end
-
-      def start!
-        File.open("#{@file}.processing",'w') { |f| f.puts Time.now.xmlschema }
-      end
-
-      def error! msg=nil
-        File.open("#{@file}.error",'a') do |f| 
-          if msg.nil?
-            entries.each do |entry|
-              if entry.errors.count > 0
-                f.puts "Row #{entry.row}:"
-                entry.errors.messages.each { |k,m| f.puts %{  #{m.join("\n  ")}} }
-              end
-            end
-          else
-            f.puts msg
-          end
-        end
-        rollback! if processing?
-      end
-
-      def rollback!
-        File.unlink("#{@file}.processing")
-      end
-
-      def commit!
-        File.open("#{@file}.processed",'w') { |f| f.puts Time.now.xmlschema }
-        rollback! if processing?
       end
 
       def error?
@@ -133,9 +91,9 @@ module Avalon
       end
 
       def create_entries!
-        f = @spreadsheet.first_row + 2
-        l = @spreadsheet.last_row
-        f.upto(l) do |index|
+        first = @spreadsheet.first_row + 2
+        last = @spreadsheet.last_row
+        first.upto(last) do |index|
           opts = {
             :publish => false,
             :hidden  => false
@@ -147,13 +105,13 @@ module Avalon
           content=[]
 
           fields = Hash.new { |h,k| h[k] = [] }
-          @field_names.each_with_index do |f,i| 
+          @field_names.each_with_index do |f,i|
             unless f.blank? || SKIP_FIELDS.include?(f) || values[i].blank?
               if FILE_FIELDS.include?(f)
                 content << {} if f == :file
                 content.last[f] = f == :skip_transcoding ? true?(values[i]) : values[i]
               else
-                fields[f] << values[i] 
+                fields[f] << values[i]
               end
             end
           end
