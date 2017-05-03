@@ -18,7 +18,7 @@ module Avalon
       include Enumerable
       extend Forwardable
 
-      attr_reader :dir, :manifest, :collection
+      attr_reader :manifest, :collection
       def_delegators :@manifest, :each
 
       def self.locate(root, collection)
@@ -26,7 +26,6 @@ module Avalon
       end
 
       def initialize(manifest, collection)
-        @dir = File.dirname(manifest)
         @manifest = Avalon::Batch::Manifest.load(manifest, self)
         @collection = collection
       end
@@ -41,17 +40,17 @@ module Avalon
       end
 
       def file_list
-        @manifest.collect { |entry| entry.files }.flatten.collect { |f| File.join(@dir,f[:file]) }
+        @manifest.collect { |entry| entry.files }.flatten.collect { |f| @manifest.path_to(f[:file]) }
       end
 
       def complete?
-        file_list.all? { |f| File.file?(f) }
+        file_list.all? { |f| @manifest.present?(f) }
       end
 
       def each_entry
         @manifest.each_with_index do |entry, index|
           files = entry.files.dup
-          files.each { |file| file[:file] = File.join(@dir,file[:file]) }
+          files.each { |file| file[:file] = @manifest.path_to(file[:file]) }
           yield(entry.fields, files, entry.opts, entry, index)
         end
       end

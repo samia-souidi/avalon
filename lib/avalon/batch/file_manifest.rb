@@ -3,7 +3,7 @@ module Avalon
     class FileManifest < Manifest
       class << self
         def locate(root)
-          possibles = Dir[File.join(root, "**/*.{#{EXTENSIONS.join(',')}}")]
+          possibles = Dir[File.join(root, "**/*.{#{Manifest::EXTENSIONS.join(',')}}")]
           possibles.reject do |file|
             File.basename(file) =~ /^~\$/ or self.error?(file) or self.processing?(file) or self.processed?(file)
           end
@@ -27,10 +27,6 @@ module Avalon
 
         def processed?(file)
           File.file?("#{file}.processed")
-        end
-
-        def open_spreadsheet(file)
-          Roo::Spreadsheet.open(file)
         end
       end
 
@@ -61,6 +57,22 @@ module Avalon
       def commit!
         File.open("#{@file}.processed",'w') { |f| f.puts Time.now.xmlschema }
         rollback! if processing?
+      end
+
+      def path_to(f)
+        File.join(File.dirname(@file),f)
+      end
+
+      def present?(f)
+        File.file?(f)
+      end
+
+      def retrieve(f)
+        File.open(f)
+      end
+
+      def attachment(f)
+        File.open(f)
       end
     end
   end

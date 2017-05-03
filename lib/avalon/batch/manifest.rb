@@ -29,7 +29,7 @@ module Avalon
 
       class << self
         def concrete_class=(value)
-          raise ArgumentError, "#{value} is not a Manifest" unless value.is_a?(self)
+          raise ArgumentError, "#{value} is not a #{self.name}" unless self.descendants.include?(value)
           @concrete_class = value
         end
 
@@ -40,10 +40,14 @@ module Avalon
         def load(*args)
           concrete_class.new(*args)
         end
+
+        def locate(root)
+          concrete_class.locate(root)
+        end
       end
 
       def initialize(file, package)
-        raise "#{self.class.name} is an abstract class. Please set #concrete_class and use #load()" unless self.class.respond_to?(:open_spreadsheet)
+        raise "#{self.class.name} is an abstract class. Please set #concrete_class and use #load()" unless self.respond_to?(:start!)
         @file = file
         @package = package
         load!
@@ -52,7 +56,7 @@ module Avalon
       def load!
         @entries = []
         begin
-          @spreadsheet = self.class.open_spreadsheet(file)
+          @spreadsheet = Roo::Spreadsheet.open(FileLocator.new(file).location)
           @name = @spreadsheet.row(@spreadsheet.first_row)[0]
           @email = @spreadsheet.row(@spreadsheet.first_row)[1]
 

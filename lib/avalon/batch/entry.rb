@@ -29,7 +29,7 @@ module Avalon
     	  @row    = row
     	  @manifest = manifest
     	  @errors = ActiveModel::Errors.new(self)
-    	  @files.each { |file| file[:file] = File.join(@manifest.package.dir, file[:file]) }
+    	  @files.each { |file| file[:file] = @manifest.path_to(file[:file]) }
       end
 
       def media_object
@@ -105,10 +105,10 @@ module Avalon
           valid = false
         end
         # Ensure listed files exist
-        if File.file?(file_spec[:file]) && self.class.derivativePaths(file_spec[:file]).present?
+        if @manifest.present?(file_spec[:file]) && self.class.derivativePaths(file_spec[:file]).present?
           @errors.add(:content, "Both original and derivative files found")
           valid = false
-        elsif File.file?(file_spec[:file])
+        elsif @manifest.present?(file_spec[:file])
           #Do nothing.
         else
           if self.class.derivativePaths(file_spec[:file]).present? && file_spec[:skip_transcoding]
@@ -144,13 +144,13 @@ module Avalon
 
       def self.attach_datastreams_to_master_file( master_file, filename )
           structural_file = "#{filename}.structure.xml"
-          if File.exists? structural_file
-            master_file.structuralMetadata.content=File.open(structural_file)
+          if @manifest.present?(structural_file)
+            master_file.structuralMetadata.content=@manifest.retrieve(structural_file)
             master_file.structuralMetadata.original_name = structural_file
           end
           captions_file = "#{filename}.vtt"
-          if File.exists? captions_file
-            master_file.captions.content=File.open(captions_file)
+          if @manifest.present?(captions_file)
+            master_file.captions.content=@manifest.retrieve(captions_file)
             master_file.captions.mime_type='text/vtt'
             master_file.captions.original_name = captions_file
           end
@@ -201,16 +201,16 @@ module Avalon
         derivatives = {}
         %w(low medium high).each do |quality|
           derivative = self.derivativePath(file, quality)
-          derivatives["quality-#{quality}"] = File.new(derivative) if File.file? derivative
+          derivatives["quality-#{quality}"] = @manifest.attachment(derivative) if @manifest.present? derivative
         end
-        derivatives.empty? ? File.new(file) : derivatives
+        derivatives.empty? ? @manifest.attachment(file) : derivatives
       end
 
       def self.derivativePaths(filename)
         paths = []
         %w(low medium high).each do |quality|
           derivative = self.derivativePath(filename, quality)
-          paths << derivative if File.file? derivative
+          paths << derivative if @manifest.present? derivative
         end
         paths
       end
