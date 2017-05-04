@@ -44,7 +44,7 @@ module Avalon
       end
 
       def complete?
-        file_list.all? { |f| @manifest.present?(f) }
+        file_list.all? { |f| FileLocator.new(f).exist? }
       end
 
       def each_entry

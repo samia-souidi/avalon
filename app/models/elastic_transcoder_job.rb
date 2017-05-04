@@ -172,6 +172,7 @@ class ElasticTranscoderJob < ActiveEncode::Base
     end
 
     def convert_bitrate(rate)
+      return nil if rate.nil?
       (rate.to_f * 1024).to_s
     end
 
@@ -209,12 +210,14 @@ class ElasticTranscoderJob < ActiveEncode::Base
       end
 
       unless preset.nil?
+        audio = preset.audio
+        video = preset.video
         metadata.merge!({
-          audio_codec: preset.audio.codec,
-          audio_channels: preset.audio.channels,
-          audio_bitrate: convert_bitrate(preset.audio.bit_rate),
-          video_codec: preset.video.codec,
-          video_bitrate: convert_bitrate(preset.video.bit_rate)
+          audio_codec: audio&.codec,
+          audio_channels: audio&.channels,
+          audio_bitrate: convert_bitrate(audio&.bit_rate),
+          video_codec: video&.codec,
+          video_bitrate: convert_bitrate(video&.bit_rate)
         })
       end
 

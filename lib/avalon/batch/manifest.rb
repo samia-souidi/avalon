@@ -37,6 +37,10 @@ module Avalon
           @concrete_class ||= FileManifest
         end
 
+        def is_spreadsheet?(file)
+          EXTENSIONS.include?(file.split(/\./).last.downcase)
+        end
+
         def load(*args)
           concrete_class.new(*args)
         end

@@ -236,7 +236,7 @@ class MasterFile < ActiveFedora::Base
 
     #Build hash for single file skip transcoding
     if !file.is_a?(Hash) && (self.workflow_name == 'avalon-skip-transcoding' || self.workflow_name == 'avalon-skip-transcoding-audio')
-      file = {'quality-high' => File.new(file_location)}
+      file = {'quality-high' => FileLocator.new(file_location).attachment}
     end
 
     input = if file.is_a? Hash

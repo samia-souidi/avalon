@@ -63,15 +63,7 @@ module Avalon
         File.join(File.dirname(@file),f)
       end
 
-      def present?(f)
-        File.file?(f)
-      end
-
       def retrieve(f)
-        File.open(f)
-      end
-
-      def attachment(f)
         File.open(f)
       end
     end

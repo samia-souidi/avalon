@@ -54,7 +54,37 @@ class FileLocator
     end
   end
 
-  def open(&block)
-    Kernel::open(location, 'r', &block)
+  def exist?
+    case uri.scheme
+    when 's3'
+      S3File.new(uri).object.exists?
+    when 'file'
+      File.exist?(location)
+    else
+      false
+    end
+  end
+  alias_method :exists?, :exist?
+
+  def reader
+    case uri.scheme
+    when 's3'
+      S3File.new(uri).object.get.body
+    when 'file'
+      File.open(location,'r')
+    else
+      Kernel::open(uri.to_s, 'r')
+    end
+  end
+
+  def attachment
+    case uri.scheme
+    when 's3'
+      uri
+    when 'file'
+      File.open(location,'r')
+    else
+      location
+    end
   end
 end

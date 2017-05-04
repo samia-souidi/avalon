@@ -72,6 +72,7 @@ gem 'parallel'
 gem 'avalon-about', git: 'https://github.com/avalonmediasystem/avalon-about.git', tag: 'avalon-r6'
 gem 'about_page', git: 'https://github.com/avalonmediasystem/about_page.git', tag: 'avalon-r6'
 gem 'config'
+gem 'marc'
 
 #MediaElement.js related
 gem 'mediaelement_rails', git: 'https://github.com/avalonmediasystem/mediaelement_rails.git', tag: 'avalon-r6'
@@ -147,6 +148,10 @@ group :aws, optional: true do
   gem 'cloudfront-signer'
   gem 'zk'
   gem 'active_elastic_job', '~> 1.7'
+end
+
+group :zoom, optional: true do
+  gem 'zoom'
 end
 
 group :mysql, optional: true do

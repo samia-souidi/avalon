@@ -6,7 +6,7 @@ module Avalon
           root_object = FileLocator::S3File.new(root).object
           bucket = root_object.bucket
           manifests = bucket.objects(prefix: root_object.key).select do |o|
-            Manifest::EXTENSIONS.include?(File.extname(o.key).sub(/^\./,'')) && status(bucket.object(o.key)).blank?
+            is_spreadsheet?(o.key) && status(bucket.object(o.key)).blank?
           end
           manifests.collect { |o| "s3://#{o.bucket_name}/#{o.key}" }
         end
@@ -42,23 +42,35 @@ module Avalon
       end
 
       def commit!   ; self.class.status!(file, 'processed')  ; end
-      def error!(e) ; self.class.status!(file, 'error')      ; end
       def start!    ; self.class.status!(file, 'processing') ; end
+
+      def error!(msg=nil)
+        begin
+          error_obj = FileLocator::S3File.new("#{file}.error").object
+          io = StringIO.new
+          if msg.nil?
+            entries.each do |entry|
+              if entry.errors.count > 0
+                io.puts "Row #{entry.row}:"
+                entry.errors.messages.each { |k,m| io.puts %{  #{m.join("\n  ")}} }
+              end
+            end
+          else
+            io.puts msg
+          end
+          io.rewind
+          error_obj.put(body: io)
+        ensure
+          self.class.status!(file, 'error')
+        end
+      end
 
       def path_to(f)
         FileLocator.new(file).uri.join(f).to_s
       end
 
-      def present?(f)
-        FileLocator::S3File.new(f).object.exists?
-      end
-
       def retrieve(f)
         FileLocator::S3File.new(f).object.get.body
-      end
-
-      def attachment(f)
-        return f
       end
     end
   end
