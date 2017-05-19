@@ -18,7 +18,17 @@ module Avalon
     def self.lti_configured?
       Devise.omniauth_providers.include?(:lti)
     end
-    Config = Settings.auth.configuration.collect(&:to_hash)
+
+    def self.load_configs
+      configs = Settings.auth.configuration
+      if configs.is_a?(Array)
+        configs.collect(&:to_hash)
+      else
+        configs.to_hash.values
+      end
+    end
+
+    Config = load_configs
     if ENV['LTI_AUTH_KEY']
       Config << { name: 'LTI', provider: :lti, hidden: true, params: { oauth_credentials: { ENV['LTI_AUTH_KEY'] => ENV['LTI_AUTH_SECRET'] } } }
     end
