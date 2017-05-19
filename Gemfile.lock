@@ -535,6 +535,9 @@ GEM
     omniauth-identity (1.1.1)
       bcrypt-ruby (~> 3.0)
       omniauth (~> 1.0)
+    omniauth-openam (1.0.0)
+      faraday
+      omniauth (~> 1.0)
     orm_adapter (0.5.0)
     os (0.9.6)
     parallel (1.10.0)
@@ -848,6 +851,7 @@ DEPENDENCIES
   net-ldap
   omniauth-identity
   omniauth-lti!
+  omniauth-openam
   parallel
   pg
   pry-byebug
