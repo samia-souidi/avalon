@@ -53,15 +53,11 @@ services:
     ports:
       - "6379:6379"
   selenium:
-    image: elgalu/selenium
+    image: selenium/standalone-chrome-debug
     ports:
-      - "4444:24444"
-      - "5900:25900"
-    volumes:
-      - /dev/shm:/dev/shm
-    privileged: true
-    environment:
-      - TZ=US/Eastern
+      - "4444:4444"
+      - "5900:5900"
+    shm_size: 2g
   avalon:
     image: avalonmediasystem/avalon:6.x-dev
     command: "/rails_init-dev.sh"
@@ -73,10 +69,10 @@ services:
       - selenium
     environment:
       - APP_NAME=avalon
-      - ASSET_HOST=http://test.host/
+      - ASSET_HOST=http://avalon/
       - AVALON_BRANCH=develop
       - AVALON_DB_PASSWORD=avalondb
-      - BASE_URL=http://test.host
+      - BASE_URL=http://avalon
       - CONTROLLED_VOCABULARY=config/controlled_vocabulary.yml
       - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
       - DROPBOX_PATH=/masterfiles/dropbox

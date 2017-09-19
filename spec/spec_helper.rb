@@ -18,6 +18,7 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'capybara/rspec'
 require 'rspec/retry'
+require 'selenium/webdriver'
 
 RSpec.configure do |config|
   # show retry status in spec process
@@ -25,9 +26,6 @@ RSpec.configure do |config|
   # show exception that triggers a retry if verbose_retry is set to true
   config.display_try_failure_messages = true
   # run retry only on features
-  config.around :each, :js do |ex|
-    ex.run_with_retry retry: 5
-  end
 
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
@@ -52,53 +50,66 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-# The settings below are suggested to provide a good initial experience
-# with RSpec, but feel free to customize to your heart's content.
-=begin
-  # These two settings work together to allow you to limit a spec run
-  # to individual examples or groups you care about by tagging them with
-  # `:focus` metadata. When nothing is tagged with `:focus`, all examples
-  # get run.
-  config.filter_run :focus
-  config.run_all_when_everything_filtered = true
-
-  # Allows RSpec to persist some state between runs in order to support
-  # the `--only-failures` and `--next-failure` CLI options. We recommend
-  # you configure your source control system to ignore this file.
-  config.example_status_persistence_file_path = "spec/examples.txt"
-
-  # Limits the available syntax to the non-monkey patched syntax that is
-  # recommended. For more details, see:
-  #   - http://rspec.info/blog/2012/06/rspecs-new-expectation-syntax/
-  #   - http://www.teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/
-  #   - http://rspec.info/blog/2014/05/notable-changes-in-rspec-3/#zero-monkey-patching-mode
-  config.disable_monkey_patching!
-
-  # Many RSpec users commonly either run the entire suite or an individual
-  # file, and it's useful to allow more verbose output when running an
-  # individual spec file.
-  if config.files_to_run.one?
-    # Use the documentation formatter for detailed output,
-    # unless a formatter has already been configured
-    # (e.g. via a command-line flag).
-    config.default_formatter = 'doc'
+  config.before(:each) do
+    if selenium_remote?
+      Capybara.app_host = "http://avalon"
+    end
   end
 
-  # Print the 10 slowest examples and example groups at the
-  # end of the spec run, to help surface which specs are running
-  # particularly slow.
-  config.profile_examples = 10
+  config.after(:each) do
+    Capybara.reset_sessions!
+    Capybara.use_default_driver
+    Capybara.app_host = nil
+  end
 
-  # Run specs in random order to surface order dependencies. If you find an
-  # order dependency and want to debug it, you can fix the order by providing
-  # the seed, which is printed after each run.
-  #     --seed 1234
-  config.order = :random
-
-  # Seed global randomization in this process using the `--seed` CLI option.
-  # Setting this allows you to use `--seed` to deterministically reproduce
-  # test failures related to randomization by passing the same `--seed` value
-  # as the one that triggered the failure.
-  Kernel.srand config.seed
-=end
+  # Determines if a selenium_remote_* driver is being used
+  def selenium_remote?
+    !(Capybara.current_driver.to_s =~ /\Aselenium_remote/).nil?
+  end
 end
+
+# SELENIUM_SERVER is the IP address or hostname of the system running Selenium
+# Server, this is used to determine where to connect to when using one of the
+# selenium_remote_* drivers
+SELENIUM_URL = "selenium:4444/wd/hub"
+
+# SELENIUM_APP_HOST is the IP address or hostname of this system (where the
+# tests run against) as reachable for the SELENIUM_SERVER. This is used to set
+# the Capybara.app_host when using one of the selenium_remote_* drivers
+#SELENIUM_APP_HOST = "10.10.11.2"
+
+# CAPYBARA_DRIVER is the Capybara driver to use, this defaults to Selenium with
+# Firefox
+CAPYBARA_DRIVER = "selenium_remote_chrome"
+
+# At this point, Capybara.default_driver is :rack_test, and
+# Capybara.javascript_driver is :selenium. We can't run :selenium in the Vagrant box,
+# so we set the javascript driver to :selenium_remote_firefox which we're going to
+# configure.
+Capybara.javascript_driver = :selenium_remote_chrome
+
+# CapybaraDriverRegistrar is a helper class that enables you to easily register
+# Capybara drivers
+class CapybaraDriverRegistrar
+
+  # register a Selenium driver for the given browser to run on the localhost
+  def self.register_selenium_local_driver(browser)
+    Capybara.register_driver "selenium_#{browser}".to_sym do |app|
+      Capybara::Selenium::Driver.new(app, browser: browser)
+    end
+  end
+
+  # register a Selenium driver for the given browser to run with a Selenium
+  # Server on another host
+  def self.register_selenium_remote_driver(browser)
+    Capybara.register_driver "selenium_remote_#{browser}".to_sym do |app|
+      Capybara::Selenium::Driver.new app,
+        browser: :remote,
+        url: "http://#{SELENIUM_URL}",
+        desired_capabilities: browser
+    end
+  end
+end
+
+# Register various Selenium drivers
+CapybaraDriverRegistrar.register_selenium_remote_driver(:chrome)

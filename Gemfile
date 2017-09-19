@@ -38,15 +38,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-# Use Unicorn as the app server
-# gem 'unicorn'
-
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
-
 gem 'rsolr', '~> 1.0'
 gem 'devise'
-#gem 'devise-guests', '~> 0.3'
 
 # Avalon-specific
 gem 'avalon-workflow', git: "https://github.com/avalonmediasystem/avalon-workflow.git", tag: 'avalon-r6.2'
@@ -142,7 +135,9 @@ group :test do
   gem 'fakefs', require: 'fakefs/safe'
   gem 'email_spec'
   gem 'capybara'
-  gem 'poltergeist'
+  gem 'capybara-selenium'
+  gem 'selenium-webdriver'
+  gem 'chromedriver-helper'
   gem 'rspec-retry'
   gem 'hashdiff'
   gem 'webmock'
