@@ -38,22 +38,27 @@ module Avalon
         :open_timeout => nil,
         headers: {:content_type => :json, :accept => :json, :'Avalon-Api-Key' => target[:api_token]},
         verify_ssl: false)
-      result = JSON.parse(resp.body)
+      result = JSON.parse(resp.body).sort_by{ |c| c["name"] }
     end
 
-    def self.push_media_object(media_object, collection_id, avalon="default")
+    def self.push_media_object(media_object, collection_id, include_structure=true, avalon='default')
       target = get_avalons[avalon].symbolize_keys
       uri = URI.join(target[:url],'media_objects.json')
-      payload = media_object.to_ingest_api_hash
+      payload = media_object.to_ingest_api_hash(include_structure)
       payload[:collection_id] = collection_id
       payload[:import_bib_record] = target[:import_bib_record]
       payload[:publish] = target[:publish]
-      resp = RestClient::Request.execute(method: :post,
-        url: uri.to_s,
-        payload: payload.to_json,
-        headers: {:content_type => :json, :accept => :json, :'Avalon-Api-Key' => target[:api_token]},
-        verify_ssl: false)
-      result = JSON.parse(resp.body)
+      begin
+        resp = RestClient::Request.execute(method: :post,
+          url: uri.to_s,
+          payload: payload.to_json,
+          headers: {:content_type => :json, :accept => :json, :'Avalon-Api-Key' => target[:api_token]},
+          verify_ssl: false)
+        result = JSON.parse(resp.body)
+      rescue StandardError => e
+        result = { status: e.response.code, message: e.message }
+      end
+      result
     end
 
   end
