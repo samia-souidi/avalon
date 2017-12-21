@@ -10,14 +10,9 @@
 var mejs4AvalonPlayer = new MEJSPlayer({
   currentStreamInfo: <%= section_info.to_json.html_safe %>,
   features: ['playpause', 'current', 'progress', 'duration', 'volume', 'tracks', '<%= section_info[:is_video] ? "quality" : "hdToggle" %>', 'linkBack', 'fullscreen'],
-  highlightRail: true
-});
-
-mejs4AvalonPlayer.addEventListener(
-  'mejs4handleSuccess',
-  function() {
-    const t = mejs4AvalonPlayer.player
-    t.globalUnbind('resize', t.globalResizeCallback);
+  highlightRail: true,
+  success: function(mediaElement, domObject, player) {
+      player.globalUnbind('resize', player.globalResizeCallback);
   }
-);
+});
 </script>
