@@ -12,4 +12,12 @@ var mejs4AvalonPlayer = new MEJSPlayer({
   features: ['playpause', 'current', 'progress', 'duration', 'volume', 'tracks', '<%= section_info[:is_video] ? "quality" : "hdToggle" %>', 'linkBack', 'fullscreen'],
   highlightRail: true
 });
+
+mejs4AvalonPlayer.addEventListener(
+  'mejs4handleSuccess',
+  function() {
+    const t = mejs4AvalonPlayer.player
+    t.globalUnbind('resize', t.globalResizeCallback);
+  }
+);
 </script>

@@ -267,15 +267,15 @@ class MEJSPlayer {
   handleSuccess(mediaElement, originalNode, instance) {
     this.mediaElement = mediaElement;
 
-    // Make the player visible
-    this.revealPlayer(instance);
-
     // Grab instance of player
     if (!this.player) {
       this.player = this.mediaElement;
     }
 
     this.emitSuccessEvent();
+
+    // Make the player visible
+    this.revealPlayer(instance);
 
     // Handle 'canplay' events fired by player
     this.mediaElement.addEventListener(
