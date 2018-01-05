@@ -238,6 +238,11 @@ class MEJSPlayer {
       this.player.setCurrentTime(time);
       this.player.setCurrentRail();
       this.player.updateCurrent(time);
+      this.player.showControls();
+      this.player.startControlsTimer();
+
+      // Manually hightlight the section link
+      this.mejsUtility.highlightSectionLink(target.id);
     }
   }
 
