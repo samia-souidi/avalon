@@ -235,7 +235,7 @@ class MEJSPlayer {
 
       // The following mimics behavior of Mediaelement library file clicking in the time rail
       // to handle hls buffering scenarios
-      this.mediaElement.setCurrentTime(time);
+      this.player.setCurrentTime(time);
       this.player.setCurrentRail();
       this.player.updateCurrent(time);
     }
