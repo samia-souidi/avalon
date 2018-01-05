@@ -232,7 +232,12 @@ class MEJSPlayer {
       const time = isHeader
         ? 0
         : parseFloat(this.segmentsMap[target.id].fragmentbegin);
+
+      // The following mimics behavior of Mediaelement library file clicking in the time rail
+      // to handle hls buffering scenarios
       this.mediaElement.setCurrentTime(time);
+      this.player.setCurrentRail();
+      this.player.updateCurrent(time);
     }
   }
 
